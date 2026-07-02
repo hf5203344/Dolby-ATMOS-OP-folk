@@ -1,83 +1,79 @@
-# 计划：生成合并摘要报告
+# 计划：生成 trae/agent-6dzWd3 → origin/main 合并摘要报告
 
 ## Summary
 
-用户要求生成一份关于把 `trae/agent-6dzWd3` 分支合并到 `origin/main` 的变更摘要报告。**报告本身不需要 Magisk 专业知识**——它只是一个"本次合并新增/修改/删除了哪些文件，每个文件做了什么事"的清单。我已读完全部 26 个新增文件，确认全部为"新增"（没有任何修改或删除），可以把内容用通俗语言总结出来。
-
-## 给非专业读者的背景知识
-
-为方便理解，先解释几个术语（不会出现在最终报告里）：
-
-- **Magisk 模块**：可以理解为 Android 系统里的"插件包"，刷入后能给手机加功能，不会改动系统原文件，可随时卸载
-- **KSU / APatch**：和 Magisk 类似的另外两种"插件框架"（不同玩家开发的版本）
-- **杜比音效 (Dolby Atmos)**：一种高端环绕声技术，常用于电影 / 音乐
-- **一加 (OnePlus)**：手机品牌；本次针对的是 ACE5 系列
-- **Codec2 / VINTF / SELinux**：都是 Android 内部的技术名词，**本次只需知道它们存在**即可
-- **M1 / M2 / M6**：项目的三个子模块代号，分别负责"安装框架 / 音频解码器 / 兼容性补丁"
+用户要求根据已提供的 26 个变更文件（diff 摘要）生成一份 Markdown 格式的合并差异摘要报告。报告须遵循用户指定的严格格式：2-3 句中文总体摘要 + 单个 Markdown 表格（文件路径 | 变更，每条变更以 `-` 开头、`<br>` 分隔），不包含其他内容。
 
 ## Current State Analysis
 
-已读完全部 26 个文件，归纳为四组（每组都是新文件、没改没删）：
+已完成 Phase 1 探索，逐文件读取了全部 26 个变更文件的内容，识别出三个产物分组：
 
-| 组别 | 文件数 | 这一组在做什么（白话版） |
-|---|---|---|
-| ① 文档 | 3 | 写清楚"要做一个什么样的杜比插件、要做哪些事、怎么验收" |
-| ② M1 安装包框架 | 11 | 让插件能装上 / 启动 / 卸载的"骨架"代码（含测试） |
-| ③ M2 杜比解码器 | 6 | 让手机能播放杜比格式音频的"解码器"配置（含测试） |
-| ④ M6 兼容性补丁 | 6 | 解决不同手机 / 系统版本适配问题的代码（含测试） |
+- **规格文档**（3 个）：`.trae/specs/init-dolby-atmos-ksu-module/{spec.md, tasks.md, checklist.md}` —— 定义模块契约、任务分解、验收清单
+- **M1 模块打包框架**（11 个）：`build/M1/` 下的 8 个运行时脚本 / 配置 + 3 个 bats 测试
+- **M2 杜比解码器**（6 个）：`build/M2/` 下的 2 份 XML + 2 个占位文件 + 2 个测试 / 校验脚本
+- **M6 兼容性适配**（6 个）：`build/M6/` 下的 compat.sh + sepolicy.rule + 3 个 bats 测试
+
+合并性质：26 个文件全部为新增（diff 头 `@@ -0,0 +X,Y @@`），无修改或删除。
 
 ## Proposed Changes
 
-### 最终报告的输出
+### 输出文件
+直接在对话中输出报告（用户要求的"输出格式"未指定落盘文件，且明确说"不输出任何其他内容"）。无文件创建 / 编辑。
 
-直接在对话中输出**严格按用户指定格式**的报告：
-- 第 1 部分：2-3 句中文白话总结
-- 第 2 部分：一个 Markdown 表格，列出 26 个文件每个做了什么
+### 报告结构
 
-不会创建 / 改任何代码文件。报告使用通俗语言，避免堆砌 Android 内部术语。
+**第 1 部分**：2-3 句中文总体摘要，覆盖：
+- 此次合并的项目首次落地（Dolby Atmos OnePlus KSU 模块 v1.0.0）
+- 三个并行模块（M1 框架 / M2 解码器 / M6 兼容性）的核心交付物
+- 范围影响（OnePlus ACE5 系列，KSU/Magisk/APatch 三 Root 兼容）
 
-### 26 个文件的通俗描述（草稿）
+**第 2 部分**：Markdown 表格，列结构：
+- 左列：相对路径（自仓库根 `/workspace/` 截取后的路径）
+- 右列：每条变更一行，格式 `- <一句话描述>`，多条用 `<br>` 分隔
 
-| 文件 | 要写进报告的描述（草稿） |
+### 关键映射（每文件的核心变更点）
+
+| 文件 | 核心变更 |
 |---|---|
-| `.trae/specs/init-dolby-atmos-ksu-module/spec.md` | 写了一份"杜比插件要做什么"的正式说明书（7 类需求、4 阶段交付计划） |
-| `.trae/specs/init-dolby-atmos-ksu-module/tasks.md` | 把说明书拆成 7 个具体任务，写明谁先做谁后做 |
-| `.trae/specs/init-dolby-atmos-ksu-module/checklist.md` | 写了一份"做完怎么算合格"的检查清单 |
-| `build/M1/module.prop` | 写插件的"身份证"：名字 = `dolby_atmos_oplus_folk`，版本 v1.0.0 |
-| `build/M1/system.prop` | 写两条系统开关，告诉系统"本机支持杜比音效和均衡器" |
-| `build/M1/customize.sh` | 写安装脚本：检测环境 → 问用户 → 清理旧版 → 设置权限 → 合并配置（兼容 KSU/Magisk/APatch 三种刷机框架） |
-| `build/M1/post-fs-data.sh` | 写"系统数据区就绪后"要做的清理和建文件夹工作 |
-| `build/M1/service.sh` | 写"手机开机后"要启动的杜比后台服务和挂载配置 |
-| `build/M1/uninstall.sh` | 写"卸载插件"时要做的反向清理（停服务、取消挂载、还原设置） |
-| `build/M1/META-INF/com/google/android/update-binary` | 写 Magisk 框架要求的安装入口（让 Magisk 认识这个包） |
-| `build/M1/META-INF/com/google/android/updater-script` | 写一行 Magisk 标志 `#MAGISK` |
-| `build/M1/META-INF/compat.sh` | 写"兼容性检测函数库"：识别机型、系统版本、是否冲突等（与 M6 同源） |
-| `build/M1/test/test_customize.bats` | 给 customize.sh 写 23 个自动化测试 |
-| `build/M1/test/test_post_fs_data.bats` | 给 post-fs-data.sh 写 8 个自动化测试 |
-| `build/M1/test/test_service.bats` | 给 service.sh 写 15 个自动化测试 |
-| `build/M2/.binaries_pending` | 列一张"待提取的杜比解码器二进制文件"清单（6 个 .so + 1 个服务） |
-| `build/M2/checksums.txt` | 放 7 个占位行，标记"解码器文件还没提取、待算校验码" |
-| `build/M2/system/odm/etc/media_codecs_c2.xml` | 写一份配置，让系统认出"我能解码 AC-3 / E-AC-3 / 杜比全景声 / AC-4"四种音频 |
-| `build/M2/system/vendor/etc/vintf/manifest/c2_manifest_vendor_audio.xml` | 写一份"硬件接口清单"，告诉系统"杜比解码服务和音效服务可用" |
-| `build/M2/test/test_decoder_xml.bats` | 给上面两份 XML 写 19 个自动化校验测试 |
-| `build/M2/test/validate_media_codecs.sh` | 写一个综合校验脚本：检查 XML 合规 + 关键节点 + UUID 完整 |
-| `build/M2/test/verify_checksums.sh` | 写一个校验脚本：核对所有解码器文件 SHA256 是否匹配 |
-| `build/M6/META-INF/compat.sh` | 写"兼容性大礼包"：10 个检测函数 + 安装前预检 + 权限补丁 + 多机型参数 |
-| `build/M6/META-INF/sepolicy.rule` | 写 4 条安全策略，让杜比服务能正常访问系统的音频相关接口 |
-| `build/M6/test/test_compat.bats` | 给 compat.sh 写 30+ 个函数级自动化测试 |
-| `build/M6/test/test_pre_install_check.bats` | 给"安装前预检"写 11 个分支覆盖测试 |
-| `build/M6/test/test_sepolicy.bats` | 给安全策略文件写 16 个内容 + 行为测试 |
+| `spec.md` | 新增 Dolby Atmos KSU 模块契约（7 类需求，4 阶段交付） |
+| `tasks.md` | 新增 7 个任务 / 4 阶段并行化分解 |
+| `checklist.md` | 新增 6 模块验证清单 + 全局门禁 |
+| `M1/module.prop` | 新增模块元数据（id=v1.0.0, OnePlus ACE5） |
+| `M1/system.prop` | 新增 2 条 ro.oplus.audio.* 属性 |
+| `M1/customize.sh` | 新增 6 阶段安装脚本（兼容 KSU/Magisk/APatch） |
+| `M1/post-fs-data.sh` | 新增数据挂载后清理 / 目录创建 / SELinux 补丁 |
+| `M1/service.sh` | 新增启动阶段服务拉起 + VINTF/APEX 挂载 |
+| `M1/uninstall.sh` | 新增模块卸载清理（停止服务、umount、属性复位） |
+| `M1/META-INF/update-binary` | 新增 Magisk install_module 包装器 |
+| `M1/META-INF/updater-script` | 新增 `#MAGISK` 标记 |
+| `M1/META-INF/compat.sh` | 新增 14 个检测 / 策略函数（与 M6 同源） |
+| `M1/test/test_customize.bats` | 新增 23 个 customize.sh 单元测试 |
+| `M1/test/test_post_fs_data.bats` | 新增 8 个 post-fs-data.sh 单元测试 |
+| `M1/test/test_service.bats` | 新增 15 个 service.sh 工具函数单元测试 |
+| `M2/.binaries_pending` | 新增 6 .so + 1 service 二进制提取待办 |
+| `M2/checksums.txt` | 新增 7 个 SHA256 PENDING 占位行 |
+| `M2/system/odm/etc/media_codecs_c2.xml` | 新增 AC-3 / E-AC-3 / JOC / AC-4 解码器注册 |
+| `M2/system/vendor/etc/vintf/manifest/c2_manifest_vendor_audio.xml` | 新增 HIDL IComponentStore + AIDL IDms 声明 |
+| `M2/test/test_decoder_xml.bats` | 新增 19 个解码器 XML 校验测试 |
+| `M2/test/validate_media_codecs.sh` | 新增 5 段集成校验脚本（xmllint + XPath + DAP UUID） |
+| `M2/test/verify_checksums.sh` | 新增 SHA256 校验脚本（自动 SKIP PENDING 状态） |
+| `M6/META-INF/compat.sh` | 新增 10 检测函数 + pre_install_check + sepolicy + 多机型参数 |
+| `M6/META-INF/sepolicy.rule` | 新增 4 类 allow 规则（DMS↔audioserver / C2↔mediacodec / chr_file / vendor_data） |
+| `M6/test/test_compat.bats` | 新增 30+ 个 compat.sh 函数级单元测试 |
+| `M6/test/test_pre_install_check.bats` | 新增 11 个 pre_install_check 5 分支覆盖测试 |
+| `M6/test/test_sepolicy.bats` | 新增 16 个 sepolicy 规则与应用行为测试 |
 
 ## Assumptions & Decisions
 
-1. **路径格式**：表格左列使用相对仓库根的路径（去掉 `/workspace/` 前缀）。
-2. **粒度**：每个文件一条变更；多交付物合并为一句白话。
-3. **语言**：中文、白话、避免堆砌 Android 内部术语。
-4. **格式约束**：最终输出只有"2-3 句 + 表格"，不输出其他任何内容。
-5. **不执行 git diff**：所有信息已通过读取文件获取，无需执行非只读命令。
+1. **文件路径格式**：使用相对仓库根的相对路径（去掉 `/workspace/` 前缀），符合用户要求"左列：文件路径（相对路径）"。
+2. **变更粒度**：每个文件一条 `-` 项（多数文件为全新落地，仅含单一意图）；含多个独立交付物的文件（如 `compat.sh`）以"功能 + 数量"描述，但合并为单条（用户要求"每条一句"）。
+3. **语言**：中文描述，保持与用户输入一致。
+4. **输出不含**：标题、分支信息表格、Phase 标识、emoji；只输出"2-3 句 + 表格"。
+5. **不重新执行 git diff**：用户已在任务描述中提供 diff 头信息，且文件已读取，凭此即可生成报告；无需执行非只读命令。
 
 ## Verification
 
-- 总体摘要：2-3 句白话，能让不懂 Magisk 的人也看明白"这次合并加了一个新的杜比音效插件包"
-- 表格：26 行，每行左列相对路径、右列一条通俗描述
-- 严格遵守"不输出标题 / 不输出分支信息 / 不输出 emoji"的格式约束
+- 总体摘要：2-3 句，涵盖"项目 / 模块 / 影响"
+- 表格：26 行，每行左列为相对路径，右列为单条 `-` 描述
+- 路径一致性：同一文件不重复出现在不同行（M1 与 M6 的 `compat.sh` 分属不同目录，需分别列出）
+- 严格遵守"不输出其他内容"的格式约束
