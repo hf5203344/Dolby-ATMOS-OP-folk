@@ -1,0 +1,18 @@
+<!--
+    Dolby Atmos OnePlus folk popularization
+    VINTF manifest: Codec2 HIDL 服务声明
+    保留 Qualcomm 音频 C2 default2 声明，添加 Dolby C2 default1 实例
+-->
+<manifest version="1.0" type="device">
+    <hal format="hidl">
+        <name>android.hardware.media.c2</name>
+        <transport>hwbinder</transport>
+        <fqname>@1.0::IComponentStore/default2</fqname>
+        <fqname>@1.0::IComponentStore/default1</fqname>
+    </hal>
+    <hal format="aidl">
+        <name>vendor.dolby.dms</name>
+        <version>1</version>
+        <fqname>IDms/default</fqname>
+    </hal>
+</manifest>

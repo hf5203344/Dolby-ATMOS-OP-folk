@@ -1,0 +1,8 @@
+# Dolby Atmos OnePlus folk popularization
+# 系统属性配置文件
+
+# 音频效果类型
+ro.oplus.audio.effect.type=dolby
+
+# 杜比均衡器支持
+ro.oplus.audio.dolby.equalizer_support=true

@@ -1,0 +1,11 @@
+# SHA256 checksums of Dolby decoder binaries
+# Format: <sha256>  <filename>
+# These will be filled after extracting from /data/user/work/dolby_ref/
+
+# PENDING: <sha256>  system/vendor/lib64/libcodec2_soft_ac4dec_sp.so
+# PENDING: <sha256>  system/vendor/lib64/libcodec2_soft_ddpdec_sp.so
+# PENDING: <sha256>  system/vendor/lib64/libcodec2_soft_common.so
+# PENDING: <sha256>  system/vendor/lib64/libcodec2_store_dolby_sp.so
+# PENDING: <sha256>  system/vendor/lib64/libdeccfg_sp.so
+# PENDING: <sha256>  system/vendor/lib64/libYokiScale.so
+# PENDING: <sha256>  system/vendor/bin/hw/vendor.dolby_sp.media.c2@1.0-service

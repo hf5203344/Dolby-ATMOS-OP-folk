@@ -1,0 +1,6 @@
+id=dolby_atmos_oplus_folk
+name=Dolby Atmos OnePlus folk popularization
+version=v1.0.0
+versionCode=100
+author=Dolby Atmos OnePlus folk popularization Team
+description=Dolby Atmos decoder and audio effect for OnePlus ACE5 series. Supports AC-4, E-AC-3, E-AC-3-JOC decoding and DAP global audio processing. Compatible with KSU, Magisk, and APatch.

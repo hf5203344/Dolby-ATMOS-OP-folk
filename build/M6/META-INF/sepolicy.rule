@@ -1,0 +1,23 @@
+# Dolby Atmos OnePlus folk popularization
+# SELinux 策略补丁
+#
+# 由 magiskpolicy --live --apply 注入运行时策略
+# 仅在 SELinux Enforcing 模式下生效,Permissive 模式自动跳过
+#
+# 注意: dolby_sp_media_c2@1_0_service 中 @ 符号在 SELinux type 名中
+# 要写成下划线,即 vendor_dolby_sp_media_c2_1_0_service
+
+# 允许 DMS 服务访问 AudioFlinger
+allow vendor_dolby_dms_service audioserver:binder { call transfer };
+allow vendor_dolby_dms_service audioserver_service:service_manager { find };
+
+# 允许 Codec2 HAL 服务访问 MediaCodec
+allow vendor_dolby_sp_media_c2_1_0_service mediacodec:binder { call transfer };
+allow vendor_dolby_sp_media_c2_1_0_service mediacodec_service:service_manager { find };
+
+# 允许 DAP 效果库访问音频设备字符文件
+allow vendor_dolby_dms_service audio_device:chr_file { read write ioctl };
+
+# 允许 DAP 写入 vendor 数据目录
+allow vendor_dolby_dms_service vendor_data_file:dir { create write add_name search };
+allow vendor_dolby_dms_service vendor_data_file:file { create write read open getattr };

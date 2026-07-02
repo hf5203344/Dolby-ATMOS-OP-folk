@@ -1,0 +1,10 @@
+# Pending binaries from /data/user/work/dolby_ref/:
+# 1. libcodec2_soft_ac4dec_sp.so     (~2.5 MB) -> system/vendor/lib64/
+# 2. libcodec2_soft_ddpdec_sp.so     (~1.8 MB) -> system/vendor/lib64/
+# 3. libcodec2_soft_common.so        (~200 KB) -> system/vendor/lib64/
+# 4. libcodec2_store_dolby_sp.so     (~300 KB) -> system/vendor/lib64/
+# 5. libdeccfg_sp.so                 (~150 KB) -> system/vendor/lib64/
+# 6. libYokiScale.so                 (~500 KB) -> system/vendor/lib64/
+# 7. vendor.dolby_sp.media.c2@1.0-service  -> system/vendor/bin/hw/
+# Total: 6 .so + 1 service binary
+# SHA256 will be calculated after extraction and written to checksums.txt
