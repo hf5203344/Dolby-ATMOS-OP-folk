@@ -1,0 +1,69 @@
+name: Release
+
+on:
+  push:
+    tags: [ 'v*' ]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release tag (e.g. v1.0.0)'
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Build & publish release ZIP
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install zip
+        run: sudo apt-get update && sudo apt-get install -y zip
+
+      - name: Derive version
+        id: ver
+        run: |
+          TAG="${GITHUB_REF#refs/tags/}"
+          TAG="${TAG#v}"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "version=v${TAG}" >> "$GITHUB_OUTPUT"
+
+      - name: Build ZIP
+        run: |
+          cd build
+          zip -r "dolby-atmos-op-folk-${TAG}.zip" M1 M2 M6 MANIFEST.md \
+              -x "M1/test/*" "M2/test/*" "M6/test/*" "M2/.binaries_pending"
+          zip -T "dolby-atmos-op-folk-${TAG}.zip"
+          ls -la "dolby-atmos-op-folk-${TAG}.zip"
+
+      - name: Create release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: 'Dolby Atmos OP-folk ${{ steps.ver.outputs.version }}'
+          draft: true
+          fail_on_unmatched_files: true
+          files: |
+            build/dolby-atmos-op-folk-${{ env.TAG }}.zip
+            build/MANIFEST.md
+          body: |
+            ## Dolby Atmos OP-folk ${{ steps.ver.outputs.version }}
+
+            ### 质量门禁
+            - shellcheck: 0 error
+            - xmllint: 0 error
+            - bats: 152/152 PASS (15 SKIP 来自 M3 / .so 待办)
+
+            ### 已知缺失项
+            详见 `MANIFEST.md` § 3。当前 ZIP 不含 .so 二进制与 APK，
+            不可直接刷入设备运行；用于集成测试与协作开发。
+
+            ### 校验
+            ```bash
+            unzip -l dolby-atmos-op-folk-${{ env.TAG }}.zip
+            zip -T  dolby-atmos-op-folk-${{ env.TAG }}.zip
+            ```
+        env:
+          TAG: ${{ steps.ver.outputs.tag }}

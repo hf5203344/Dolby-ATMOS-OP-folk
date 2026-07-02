@@ -1,0 +1,33 @@
+# Build artifacts
+*.zip
+!build/**/*.zip
+build/dolby-atmos-op-folk-v1.0.0-dev.zip
+build/dolby-atmos-op-folk-dev.zip
+
+# Reference material (not part of source tree)
+设计/
+设计加任务/
+prompt总结/
+进度/
+
+# Build-time binaries (PENDING extraction)
+build/M2/system/vendor/lib64/
+build/M2/system/vendor/bin/
+
+# Runtime sandbox (created by tests)
+/vendor
+/odm
+/data
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Local plan / report scratch (only build-pipeline-plan.md tracked)
+.trae/documents/*.md
+!.trae/documents/build-pipeline-plan.md

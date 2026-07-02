@@ -1,0 +1,88 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, trae/** ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  quality-gate:
+    name: Static analysis & unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y shellcheck libxml2-utils zip unzip
+
+      - name: Install bats
+        run: |
+          git clone --depth 1 --branch v1.10.0 https://github.com/bats-core/bats-core.git /tmp/bats
+          sudo /tmp/bats/install.sh /usr/local
+
+      - name: shellcheck
+        run: |
+          set +e
+          FAIL=0
+          for f in build/M1/*.sh \
+                   build/M1/META-INF/compat.sh \
+                   build/M1/META-INF/com/google/android/update-binary \
+                   build/M6/META-INF/compat.sh \
+                   build/M2/test/*.sh; do
+            echo "::group::shellcheck $f"
+            if ! shellcheck -s sh "$f"; then
+              FAIL=1
+            fi
+            echo "::endgroup::"
+          done
+          exit $FAIL
+
+      - name: xmllint
+        run: |
+          set -e
+          xmllint --noout build/M2/system/odm/etc/media_codecs_c2.xml
+          xmllint --noout build/M2/system/vendor/etc/vintf/manifest/c2_manifest_vendor_audio.xml
+
+      - name: bats — M1
+        run: |
+          bats build/M1/test/test_customize.bats
+          bats build/M1/test/test_post_fs_data.bats
+          bats build/M1/test/test_service.bats
+
+      - name: bats + shell — M2
+        run: |
+          bats build/M2/test/test_decoder_xml.bats
+          sh build/M2/test/validate_media_codecs.sh
+          sh build/M2/test/verify_checksums.sh
+
+      - name: bats — M6
+        run: |
+          bats build/M6/test/test_compat.bats
+          bats build/M6/test/test_pre_install_check.bats
+          bats build/M6/test/test_sepolicy.bats
+
+  package:
+    name: Build dev ZIP
+    runs-on: ubuntu-latest
+    needs: quality-gate
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build
+        run: |
+          cd build
+          zip -r dolby-atmos-op-folk-dev.zip M1 M2 M6 MANIFEST.md \
+              -x "M1/test/*" "M2/test/*" "M6/test/*" "M2/.binaries_pending"
+          zip -T dolby-atmos-op-folk-dev.zip
+          unzip -l dolby-atmos-op-folk-dev.zip
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dolby-atmos-op-folk-dev
+          path: build/dolby-atmos-op-folk-dev.zip
+          if-no-files-found: error
